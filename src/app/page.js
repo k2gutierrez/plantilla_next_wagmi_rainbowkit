@@ -1,25 +1,24 @@
 'use client'
-import Image from "next/image";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import { useAtom } from "jotai";
-import { mingleIdAtom } from './store/atoms'
+import styles from "./profile.module.css"
+import Navbar from "./components/Navbar";
+import Connect from "./components/Connect";
+import Welcome from "./components/Welcome";
+import LFG from "./components/LFG";
+import ClaimBlanco from "./components/ClaimBlanco";
+import NoMingle from "./components/NoMingle";
+import Panel from "./components/Panel";
 
 export default function Home() {
 
-  const { address } = useAccount();
-  const [mingleId, setMingleId] = useAtom(mingleIdAtom)
-
-  const changeValue = () => {
-    setMingleId((mingleId) => mingleId + 1)
-  }
+  const { address, isConnected } = useAccount();
 
   return (
-    <main>
-      <ConnectButton />
-      <p>{address}</p>
-      <button onClick={changeValue} >change atom</button>
-      <p>{mingleId}</p>
-    </main>
+    <>
+      <Navbar />
+      <main className=" grid content-center justify-items-center text-black font-[family-name:var(--font-pressura)]">
+        <Panel />
+      </main>
+    </>
   );
 }
