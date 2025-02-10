@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import mingle from "../../../public/assets/bm6.png"
+import mingle from "../../../../public/assets/bm6.png"
 import styles from "./profile.module.css"
 import cls from "classnames"
 

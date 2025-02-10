@@ -1,5 +1,5 @@
 import React from 'react'
-import OwnConnectButton from './OwnConnectButton'
+import OwnConnectButton from './screens/OwnConnectButton'
 import Image from 'next/image'
 import mingle from "../../../public/assets/bm6.png"
 

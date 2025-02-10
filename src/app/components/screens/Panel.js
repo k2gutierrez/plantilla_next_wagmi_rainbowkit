@@ -1,12 +1,12 @@
 import React from 'react'
 import Image from 'next/image'
-import mingle from "../../../public/assets/MinglesBarrel2.png"
+import mingle from "../../../../public/assets/MinglesBarrel2.png"
 import styles from "./profile.module.css"
 import cls from "classnames"
 import { useAccount } from 'wagmi'
-import blanco from "../../../public/assets/Blanco.png"
-import reposado from "../../../public/assets/Reposado.png"
-import anejo from "../../../public/assets/Añejo.png"
+import blanco from "../../../../public/assets/Blanco.png"
+import reposado from "../../../../public/assets/Reposado.png"
+import anejo from "../../../../public/assets/Añejo.png"
 
 export default function Panel() {
 

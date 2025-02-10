@@ -3,11 +3,14 @@ import { useAccount } from "wagmi";
 import styles from "./profile.module.css"
 import Navbar from "./components/Navbar";
 import Connect from "./components/Connect";
-import Welcome from "./components/Welcome";
-import LFG from "./components/LFG";
-import ClaimBlanco from "./components/ClaimBlanco";
-import NoMingle from "./components/NoMingle";
-import Panel from "./components/Panel";
+import Welcome from "./components/screens/Welcome";
+import LFG from "./components/screens/LFG";
+import ClaimBlanco from "./components/screens/ClaimBlanco";
+import NoMingle from "./components/screens/NoMingle";
+import Panel from "./components/screens/Panel";
+import Modal1 from "./components/modals/Modal1";
+import Modal2 from "./components/modals/Modal2";
+import Modal3 from "./components/modals/Modal3";
 
 export default function Home() {
 
@@ -17,7 +20,7 @@ export default function Home() {
     <>
       <Navbar />
       <main className=" grid content-center justify-items-center text-black font-[family-name:var(--font-pressura)]">
-        <Panel />
+        <Modal3 />
       </main>
     </>
   );
