@@ -7,3 +7,6 @@
 [submodule "foundry-backend/lib/foundry-devops"]
 	path = foundry-backend/lib/foundry-devops
 	url = https://github.com/Cyfrin/foundry-devops
+[submodule "foundry-backend/lib/pyth-sdk-solidity"]
+	path = foundry-backend/lib/pyth-sdk-solidity
+	url = https://github.com/pyth-network/pyth-sdk-solidity

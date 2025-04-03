@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.10;
 
-import {ERC721} from "../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import {Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import {Strings} from "../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import {ERC721} from "../../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "../../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import {Strings} from "../../lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 error MintPriceNotPaid();
 error MaxSupply();
@@ -16,12 +16,9 @@ contract NFT is ERC721, Ownable {
     string public baseURI;
     uint256 public currentTokenId;
     uint256 public constant TOTAL_SUPPLY = 100;
-    uint256 public constant MINT_PRICE = 0 ether;
+    uint256 public constant MINT_PRICE = 0.1 ether;
 
-    constructor(
-        string memory _name,
-        string memory _symbol
-    ) ERC721(_name, _symbol) Ownable(msg.sender) {
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) Ownable(msg.sender) {
         baseURI = "ipfs://QmcoeRsFYeHzPD9Gx84aKD3tjLUKjvPEMSmoPs2GQmHR1t/";
     }
 
@@ -38,31 +35,30 @@ contract NFT is ERC721, Ownable {
         return newTokenId;
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         if (ownerOf(tokenId) == address(0)) {
             revert NonExistentTokenURI();
         }
-        return
-            bytes(baseURI).length > 0
-                ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
     }
 
     function withdrawPayments(address payable payee) external onlyOwner {
         if (address(this).balance == 0) {
             revert WithdrawTransfer();
         }
-        
+
         payable(payee).transfer(address(this).balance);
     }
 
     function _checkOwner() internal view override {
         require(msg.sender == owner(), "Ownable: caller is not the owner");
+    }
+
+    function getTotalSupply() external pure returns(uint256){
+        return TOTAL_SUPPLY;
+    }
+
+    function getMintPrice() external pure returns(uint256){
+        return MINT_PRICE;
     }
 }

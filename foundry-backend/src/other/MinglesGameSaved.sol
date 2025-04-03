@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import {ERC721} from "../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import {ERC721} from "../../lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 
 ////////////////////// Custom Errors //////////////////////
 
@@ -25,7 +25,6 @@ error NftGame__NextRoundNotAvailable();
 error NftGame__GameMustBePaused();
 
 contract NftGame {
-
     ////////////////////// Variables //////////////////////
     // Owner of contract address
     address private immutable i_owner;
@@ -37,10 +36,10 @@ contract NftGame {
     bool private gameStatus;
     bool private gamePaused;
     bool private nextRoundAvailable;
-    
+
     // Adress of NFTS that are playing - we use the mingles nft
     address private nftAddressPlayer;
-    
+
     // mapping to user struct
     mapping(uint256 => User) private users;
 
@@ -93,12 +92,13 @@ contract NftGame {
         _;
     }
 
-    modifier notPaused(){
+    modifier notPaused() {
         if (gamePaused == true) revert NftGame__GameIsPaused();
         _;
     }
 
-    modifier noContract { // this won't allow external contracts to interact with this contract
+    modifier noContract( // this won't allow external contracts to interact with this contract
+    ) {
         require(tx.origin == msg.sender, "No contracts allowed");
         _;
     }
@@ -107,7 +107,11 @@ contract NftGame {
     ////////////////////// OnlyOwner Game Functions //////////////////////
 
     ////////////////////// Start game function
-    function gameStarted(address _nftAddress, uint256 _nftId, address _nftAddressPlayer, uint256 _gameCost) external  onlyOwner noContract {
+    function gameStarted(address _nftAddress, uint256 _nftId, address _nftAddressPlayer, uint256 _gameCost)
+        external
+        onlyOwner
+        noContract
+    {
         if (gameStatus == true) revert NftGame__GameHasStarted();
         if (nftAddress != address(0)) revert NftGame__NftPrizeSet();
         if (ERC721(_nftAddress).ownerOf(_nftId) != i_owner) revert NftGame__NftNotOwned();
@@ -138,7 +142,7 @@ contract NftGame {
     ////////////////////// Activate Failed Adventure/Mision
     function ActiveAdventureFailed() external onlyOwner noContract {
         require(gamePaused == true, "Game must be paused");
-        
+
         ERC721 nft = ERC721(nftAddress);
         nft.transferFrom(address(this), i_owner, nftId);
 
@@ -160,30 +164,43 @@ contract NftGame {
         nftId = 0;
         gameStatus = false;
         nftAddressPlayer = address(0);
-        
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////// Registry and NextGame functions - Users/Gamers //////////////////////
 
     ////////////////////// New registry
-    function register(uint256 _nft, uint256 _wormLvl, bytes32 _location) external payable gameHasStarted notPaused noContract returns (bool) {
+    function register(uint256 _nft, uint256 _wormLvl, bytes32 _location)
+        external
+        payable
+        gameHasStarted
+        notPaused
+        noContract
+        returns (bool)
+    {
         if (ERC721(nftAddressPlayer).ownerOf(_nft) != msg.sender) revert NftGame__NftNotOwned();
         if (users[_nft].nftId == _nft && users[_nft].status == true) revert NftGame__NftIdRegistered();
         if (users[_nft].nftId == _nft && users[_nft].status == false) revert NftGame__NftIsDead();
-        if (msg.value < gameCost) revert  NftGame__IncorrectAmount();
+        if (msg.value < gameCost) revert NftGame__IncorrectAmount();
 
         User memory user = User(_nft, true, _location, _wormLvl, 0, true);
         users[_nft] = user;
         registros.push(_nft);
         return true;
     }
-    
+
     ////////////////////// Check if the registry must be new or give a life to the Mingle to play another game
-    function nextRound(uint256 _nft, uint256 _wormLvl, bytes32 _location) external payable gameHasStarted notPaused noContract returns (bool) {
+    function nextRound(uint256 _nft, uint256 _wormLvl, bytes32 _location)
+        external
+        payable
+        gameHasStarted
+        notPaused
+        noContract
+        returns (bool)
+    {
         if (nextRoundAvailable == false) revert NftGame__NextRoundNotAvailable();
         if (ERC721(nftAddressPlayer).ownerOf(_nft) != msg.sender) revert NftGame__NftNotOwned();
-        if (msg.value < gameCost) revert  NftGame__IncorrectAmount();
+        if (msg.value < gameCost) revert NftGame__IncorrectAmount();
 
         User memory user = users[_nft];
         if (user.nftId == 0) {
@@ -199,7 +216,6 @@ contract NftGame {
 
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////// Get game information functions //////////////////////
-
 
     function getOwner() external view returns (address) {
         return i_owner;
@@ -305,34 +321,37 @@ contract NftGame {
             jugadoresPerdidos.push(_nft);
             return false;
         }
-        
     }
 
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////// Battle to dead Mingle function //////////////////////
 
     ////////////////////// Trigger random choice to survive
-    function choice(uint256 _nft, bytes32 _location, uint256 num) external gameHasStarted notPaused noContract returns (bool){
+    function choice(uint256 _nft, bytes32 _location, uint256 num)
+        external
+        gameHasStarted
+        notPaused
+        noContract
+        returns (bool)
+    {
         if (ERC721(nftAddressPlayer).ownerOf(_nft) != msg.sender) revert NftGame__MingleNotOwned();
         if (users[_nft].status = false) revert NftGame__NftIsDead();
         if (users[_nft].stage == 6) revert NftGame__AlreadyASurvivor();
 
         User storage mingle = users[_nft];
         bytes32 deadLocation = 0x6465616400000000000000000000000000000000000000000000000000000000;
-        uint256 randomNumber = randomchoices() + 1; 
+        uint256 randomNumber = randomchoices() + 1;
         if (randomNumber > num) {
             mingle.status = true;
             mingle.location = _location;
-            mingle.stage ++;
+            mingle.stage++;
 
-            if (mingle.stage == 6){
+            if (mingle.stage == 6) {
                 finalBattle.push(_nft);
             }
             return true;
         } else if (randomNumber <= num && mingle.revive == true) {
-
             return reviveMingle(_nft);
-
         } else if (randomNumber <= num && mingle.revive == false) {
             mingle.status = false;
             mingle.location = deadLocation;
@@ -340,14 +359,13 @@ contract NftGame {
             return false;
         }
         return false;
-        
     }
 
     ////////////////////////////////////////////////////////////////////////////
     ////////////////////// Battle to dead Mingle function //////////////////////
 
     ////////////////////// Trigger random choice to survive
-    function escapeChoice(uint256 _nft, bytes32 _location) external gameHasStarted noContract returns (bool){
+    function escapeChoice(uint256 _nft, bytes32 _location) external gameHasStarted noContract returns (bool) {
         if (ERC721(nftAddressPlayer).ownerOf(_nft) != msg.sender) revert NftGame__MingleNotOwned();
         if (users[_nft].status = false) revert NftGame__NftIsDead();
         require(gamePaused == true, "Game must be paused");
@@ -359,47 +377,32 @@ contract NftGame {
         if (randomNumer > percentageToDie) {
             mingle.status = true;
             mingle.location = _location;
-            mingle.stage ++;
+            mingle.stage++;
 
             mingles.push(_nft);
 
             return true;
-
         } else if (randomNumer <= percentageToDie && mingle.revive == true) {
-                
             return reviveMingle(_nft);
-
         } else if (randomNumer <= percentageToDie && mingle.revive == false) {
-
             mingle.status = false;
             jugadoresPerdidos.push(_nft);
             mingle.location = deadLocation;
             return false;
-
         }
         return false;
-        
     }
 
     ////////////////////// Trigger random choice to compare with "dead" function
     function randomchoices() private view returns (uint256) {
         uint256 num = 100;
-        return
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        blockhash(block.number - 1),
-                        block.timestamp,
-                        num
-                    )
-                )
-            ) % num;
+        return uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, num))) % num;
     }
 
     ///////////////////////////////////////////////////////////////////////
     ////////////////////// Final Step game functions //////////////////////
 
-    ////////////////////// Mingle defeated the raven, enters to the survivors chamber for raffle, 
+    ////////////////////// Mingle defeated the raven, enters to the survivors chamber for raffle,
     /*function survivor(uint256 _nft) private gameHasStarted notPaused returns (bool) {
         finalBattle.push(_nft);
 
@@ -414,7 +417,8 @@ contract NftGame {
     }*/
 
     ////////////////////// Select a winner and send prize (NFT) automatically to winner address
-    function selectWinner() external gameHasStarted onlyOwner noContract returns (uint256) { //payable?
+    function selectWinner() external gameHasStarted onlyOwner noContract returns (uint256) {
+        //payable?
         require(gamePaused == true, "Game must be paused");
         if (mingles.length == 0) revert NftGame__NoSurvivors();
 
@@ -437,22 +441,12 @@ contract NftGame {
 
         emit WinnerSelected(winner);
 
-        
         return winner;
     }
 
     ////////////////////// Random choice to trigger in winner function
     function random() private view returns (uint256) {
-        return
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        blockhash(block.number - 1),
-                        block.timestamp,
-                        mingles.length
-                    )
-                )
-            );
+        return uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), block.timestamp, mingles.length)));
     }
 
     ////////////////////// Reset game
@@ -476,7 +470,7 @@ contract NftGame {
         gameStatus = false;
         nftAddressPlayer = address(0);
     }
-    
+
     ////////////////////// If no survivors left the game end as a failed adventure
     /*
     function AdventureFailed() external gameHasStarted onlyOwner {
@@ -533,5 +527,4 @@ contract NftGame {
 
     // Fallback function is called when msg.data is not empty
     fallback() external payable {}
-
 }
